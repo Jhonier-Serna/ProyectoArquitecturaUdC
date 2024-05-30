@@ -46,10 +46,16 @@ class ComputerSimulator:
     # Métodos para crear y organizar los elementos de la GUI.
     def create_widgets(self):
         # Crea elementos de la GUI como lienzo, widget de texto y botón de inicio.
-        self.canvas = Canvas(self.root, width=1200, height=500, bg="#2A829A", highlightthickness=0)
-        self.text_widget = Text(self.root, height=5, width=40, bg="#D8BFD8", fg="black", font=("Arial", 12))
+        self.canvas = Canvas(self.root, width=1200, height=500,
+                             bg="#2A829A", highlightthickness=0)
+        self.text_widget = Text(
+            self.root, height=5, width=40, bg="#D8BFD8", fg="black", font=("Arial", 12))
         self.input_button = tk.Button(self.root, text="Comenzar", command=self.load_instructions,
                                       bg="#FF69B4", fg="white", font=("Arial", 12, "bold"))
+        self.charge_button = tk.Button(self.root, text="Cargar Instrucciones", command=self.load_single_instructions,
+                                       bg="#FF69B4", fg="white", font=("Arial", 12, "bold"))
+        self.step_button = tk.Button(self.root, text="Paso a paso", command=self.execute_single_instruction,
+                                     bg="#FF69B4", fg="white", font=("Arial", 12, "bold"))
 
     def create_layout(self):
         # Organiza los elementos de la GUI en la ventana.
@@ -57,23 +63,34 @@ class ComputerSimulator:
         self.text_widget.pack(pady=10)
         self.input_button.pack(pady=5)
 
+        self.charge_button.pack(pady=5)
+        self.step_button.pack(pady=5)
+
         self.canvas.create_rectangle(170, 40, 250, 85, outline="white")
         self.canvas.create_rectangle(70, 40, 150, 85, outline="white")
         self.canvas.create_rectangle(70, 105, 250, 165, outline="white")
         self.canvas.create_rectangle(70, 185, 250, 245, outline="white")
         self.canvas.create_rectangle(70, 265, 250, 325, outline="white")
 
-        self.bus_direcciones = self.canvas.create_rectangle(450, 105, 600, 165, outline="white")
-        self.canvas.create_text(525, 135, text="Bus de Direcciones", fill="white", font=("Arial", 12, "bold"))
-        self.bus_datos = self.canvas.create_rectangle(450, 185, 600, 245, outline="white")
-        self.canvas.create_text(525, 215, text="Bus de Datos", fill="white", font=("Arial", 12, "bold"))
-        self.bus_control = self.canvas.create_rectangle(450, 265, 600, 325, outline="white")
-        self.canvas.create_text(525, 295, text="Bus de Control", fill="white", font=("Arial", 12, "bold"))
+        self.bus_direcciones = self.canvas.create_rectangle(
+            450, 105, 600, 165, outline="white")
+        self.canvas.create_text(
+            525, 135, text="Bus de Direcciones", fill="white", font=("Arial", 12, "bold"))
+        self.bus_datos = self.canvas.create_rectangle(
+            450, 185, 600, 245, outline="white")
+        self.canvas.create_text(
+            525, 215, text="Bus de Datos", fill="white", font=("Arial", 12, "bold"))
+        self.bus_control = self.canvas.create_rectangle(
+            450, 265, 600, 325, outline="white")
+        self.canvas.create_text(
+            525, 295, text="Bus de Control", fill="white", font=("Arial", 12, "bold"))
 
-        self.canvas.create_text(350, 60, text="Banco de registros", fill="white", font=("Arial", 12, "bold"))
+        self.canvas.create_text(
+            350, 60, text="Banco de registros", fill="white", font=("Arial", 12, "bold"))
         self.canvas.create_rectangle(270, 40, 430, 350, outline="white")
 
-        self.canvas.create_text(720, 60, text="Memoria Principal", fill="white", font=("Arial", 12, "bold"))
+        self.canvas.create_text(
+            720, 60, text="Memoria Principal", fill="white", font=("Arial", 12, "bold"))
         self.canvas.create_rectangle(630, 40, 810, 350, outline="white")
         self.memory_text = self.canvas.create_text(660, 80, text="", fill="white", anchor="nw",
                                                    font=("Arial", 12, "bold"))
@@ -93,7 +110,8 @@ class ComputerSimulator:
         for signal, value in control_signals.items():
             color = "green" if value else "red"
             text = f"{signal}: {'On' if value else 'Off'}"
-            self.canvas.itemconfig(self.control_signals_text[signal], text=text, fill=color)
+            self.canvas.itemconfig(
+                self.control_signals_text[signal], text=text, fill=color)
 
     def highlight_bus(self, bus, color):
         # Resalta el bus especificado cambiando su color.
@@ -104,7 +122,8 @@ class ComputerSimulator:
         self.canvas.itemconfig(bus, outline="white")
 
     def update_memory_display(self):
-        memory_contents = "\n".join(f"{i + 1} - {instr}" for i, instr in enumerate(self.instructions))
+        memory_contents = "\n".join(
+            f"{i + 1} - {instr}" for i, instr in enumerate(self.instructions))
         self.canvas.itemconfig(self.memory_text, text=memory_contents)
 
     def reset(self):
@@ -135,6 +154,16 @@ class ComputerSimulator:
         self.update_memory_display()
         self.execute_all_instructions()
 
+    def load_single_instructions(self):
+        # Carga las instrucciones ingresadas por el usuario desde el widget de texto.
+        # Inicializa la simulación y ejecuta las instrucciones cargadas.
+        instructions = self.text_widget.get("1.0", tk.END).strip().split('\n')
+        for idx, instruction in enumerate(instructions):
+            if instruction.strip():
+                self.memory.store_instruction(idx, instruction.strip())
+                self.instructions.append(instruction.strip())
+        self.update_memory_display()
+
     # Métodos para ejecutar el ciclo de búsqueda, decodificación y ejecución de instrucciones.
     def fetch_cycle(self):
         # Realiza la fase de búsqueda de la instrucción desde la memoria.
@@ -149,7 +178,8 @@ class ComputerSimulator:
 
         opcode, reg1, reg2 = self.control_unit.decode()
 
-        operand1 = self.register_bank.get(reg1) if reg1 in self.register_bank.registers else None
+        operand1 = self.register_bank.get(
+            reg1) if reg1 in self.register_bank.registers else None
         operand2 = None
         if reg2.startswith('*'):
             address_register = reg2[1:]
@@ -157,29 +187,34 @@ class ComputerSimulator:
                 address = self.register_bank.get(address_register)
                 operand2 = self.memory.load_data(address)
             else:
-                raise ValueError(f"Invalid register for indirect addressing: {address_register}")
+                raise ValueError(f"Invalid register for indirect addressing: {
+                                 address_register}")
         elif reg2.isdigit():
             operand2 = int(reg2)
         elif reg2 in self.register_bank.registers:
             operand2 = self.register_bank.get(reg2)
 
-        control_signals = self.wired_control_unit.generate_control_signals(opcode)
+        control_signals = self.wired_control_unit.generate_control_signals(
+            opcode)
         self.update_control_signals_display(control_signals)
 
         self.highlight_bus(self.bus_direcciones, "blue")
 
         self.root.after(500, self.reset_bus_color, self.bus_direcciones)
 
-        self.root.after(500, self.execute_cycle, opcode, reg1, reg2, operand1, operand2, control_signals)
+        self.root.after(500, self.execute_cycle, opcode, reg1,
+                        reg2, operand1, operand2, control_signals)
 
     def execute_cycle(self, opcode, reg1, reg2, operand1, operand2, control_signals):
         # Realiza la fase de ejecución de la instrucción, actualizando registros y memoria según sea necesario.
         self.highlight_bus(self.bus_datos, "blue")
 
         if control_signals['alu_operation']:
-            self.alu.execute(control_signals['alu_operation'], operand1, operand2)
+            self.alu.execute(
+                control_signals['alu_operation'], operand1, operand2)
             result = self.alu.value
-            self.alu_text.set_value(f"{operand1} {opcode} {operand2} = {self.alu.value}")
+            self.alu_text.set_value(f"{operand1} {opcode} {
+                                    operand2} = {self.alu.value}")
             self.register_bank.set(reg1, result)
         elif opcode == 'LOAD':
             if reg2.startswith('*'):
@@ -205,5 +240,12 @@ class ComputerSimulator:
         if self.pc_register.value < len(self.instructions):
             self.fetch_cycle()
             self.root.after(2000, self.execute_all_instructions)
+        else:
+            print("Execution completed.")
+
+    def execute_single_instruction(self):
+        # Si no hay instrucciones en la cola, termina la ejecución
+        if self.pc_register.value < len(self.instructions):
+            self.fetch_cycle()
         else:
             print("Execution completed.")
