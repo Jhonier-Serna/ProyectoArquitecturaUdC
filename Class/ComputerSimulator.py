@@ -168,13 +168,20 @@ class ComputerSimulator:
     def fetch_cycle(self):
         # Realiza la fase de búsqueda de la instrucción desde la memoria.
         pc_value = self.pc_register.value
-        instruction = self.control_unit.fetch(self.memory, pc_value)
+        self.mar_register.set_value(pc_value)
+
+        mar_value = self.mar_register.value
+
+        instruction = self.control_unit.fetch(
+            self.memory, mar_value)
+
         if not instruction:
             raise ValueError("No instruction found at PC address")
 
+        self.mbr_register.set_value(instruction)
         self.ir_register.set_value(instruction)
-        self.mar_register.set_value(pc_value)
         self.pc_register.set_value(pc_value + 1)
+        self.mar_register.set_value(self.pc_register.value)
 
         opcode, reg1, reg2 = self.control_unit.decode()
 
@@ -207,7 +214,7 @@ class ComputerSimulator:
 
     def execute_cycle(self, opcode, reg1, reg2, operand1, operand2, control_signals):
         # Realiza la fase de ejecución de la instrucción, actualizando registros y memoria según sea necesario.
-        self.highlight_bus(self.bus_datos, "blue")
+        self.reset_data_travel()
 
         if control_signals['alu_operation']:
             self.alu.execute(
@@ -216,24 +223,37 @@ class ComputerSimulator:
             self.alu_text.set_value(f"{operand1} {opcode} {
                                     operand2} = {self.alu.value}")
             self.register_bank.set(reg1, result)
+
         elif opcode == 'LOAD':
             if reg2.startswith('*'):
                 address = self.register_bank.get(reg2[1:])
                 value = self.memory.load_data(address)
+                self.highlight_data_travel()
+                self.mbr_register.set_value(value)
+
             else:
                 value = operand2
+                self.mbr_register.set_value(value)
+                self.highlight_data_travel()
+
             self.register_bank.set(reg1, value)
+
         elif opcode == 'STORE':
+            self.highlight_data_travel()
             self.memory.store_data(operand2, operand1)
+
         elif opcode == 'MOVE':
             self.register_bank.set(reg1, self.register_bank.get(reg2))
 
-        self.root.after(500, self.reset_bus_color, self.bus_datos)
-
-        self.root.after(1000, self.highlight_bus, self.bus_control, "green")
-        self.root.after(1500, self.reset_bus_color, self.bus_control)
-
         self.update_control_signals_display(control_signals)
+
+    def reset_data_travel(self):
+        self.root.after(500, self.reset_bus_color, self.bus_control)
+        self.root.after(1000, self.reset_bus_color, self.bus_datos)
+
+    def highlight_data_travel(self):
+        self.highlight_bus(self.bus_control, "green")
+        self.highlight_bus(self.bus_datos, "blue")
 
     def execute_all_instructions(self):
         # Ejecuta todas las instrucciones cargadas secuencialmente hasta que se complete la simulación.
