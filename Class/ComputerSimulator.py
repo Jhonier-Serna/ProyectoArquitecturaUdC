@@ -184,10 +184,13 @@ class ComputerSimulator:
         self.mar_register.set_value(self.pc_register.value)
 
         opcode, reg1, reg2 = self.control_unit.decode()
-
-        operand1 = self.register_bank.get(
-            reg1) if reg1 in self.register_bank.registers else None
+        if reg1.isdigit():
+            operand1 = int(reg1)
+        else:
+            operand1 = self.register_bank.get(
+                reg1) if reg1 in self.register_bank.registers else None
         operand2 = None
+
         if reg2.startswith('*'):
             address_register = reg2[1:]
             if address_register in self.register_bank.registers:
@@ -195,7 +198,7 @@ class ComputerSimulator:
                 operand2 = self.memory.load_data(address)
             else:
                 raise ValueError(f"Invalid register for indirect addressing: {
-                                 address_register}")
+                address_register}")
         elif reg2.isdigit():
             operand2 = int(reg2)
         elif reg2 in self.register_bank.registers:
@@ -217,12 +220,18 @@ class ComputerSimulator:
         self.reset_data_travel()
 
         if control_signals['alu_operation']:
-            self.alu.execute(
-                control_signals['alu_operation'], operand1, operand2)
+            self.alu.execute(control_signals['alu_operation'], operand1, operand2)
             result = self.alu.value
-            self.alu_text.set_value(f"{operand1} {opcode} {
-                                    operand2} = {self.alu.value}")
-            self.register_bank.set(reg1, result)
+
+            if opcode in ['ADD', 'SUB', 'MUL', 'DIV', 'AND', 'OR', 'NOT', 'XOR']:
+                self.alu_text.set_value(
+                    f"{operand1} {opcode} {operand2 if operand2 is not None else ''} = {self.alu.value}")
+                self.register_bank.set(reg1, result)
+            elif opcode == 'JUMP':
+                self.pc_register.set_value(result)
+            elif opcode == 'JUMP_IF_ZERO':
+                if result is not None:
+                    self.pc_register.set_value(result)
 
         elif opcode == 'LOAD':
             if reg2.startswith('*'):

@@ -24,3 +24,15 @@ class ALU:
                 self.value = 0
             else:
                 self.value = operand1 / operand2
+        elif opcode == 'AND':
+            self.value = operand1 & operand2
+        elif opcode == 'OR':
+            self.value = operand1 | operand2
+        elif opcode == 'NOT':
+            self.value = ~operand2
+        elif opcode == 'XOR':
+            self.value = operand1 ^ operand2
+        elif opcode == 'JP':
+            self.value = operand1  # For jump, the value is the new address
+        elif opcode == 'JPZ':
+            self.value = operand1 if operand2 == 0 else None  # operand1 is the address, operand2 is the condition

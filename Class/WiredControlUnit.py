@@ -21,14 +21,9 @@ class WiredControlUnit:
             'alu_operation': None,
         }
 
-        if opcode == 'ADD':
+        if opcode in ['ADD', 'SUB', 'MUL', 'DIV', 'AND', 'OR', 'NOT', 'XOR']:
             self.control_signals['execute'] = True
-            self.control_signals['alu_operation'] = 'ADD'
-            self.control_signals['register_read'] = True
-            self.control_signals['register_write'] = True
-        elif opcode == 'SUB':
-            self.control_signals['execute'] = True
-            self.control_signals['alu_operation'] = 'SUB'
+            self.control_signals['alu_operation'] = opcode
             self.control_signals['register_read'] = True
             self.control_signals['register_write'] = True
         elif opcode == 'LOAD':
@@ -39,5 +34,11 @@ class WiredControlUnit:
         elif opcode == 'MOVE':
             self.control_signals['register_read'] = True
             self.control_signals['register_write'] = True
+        elif opcode == 'JUMP':
+            self.control_signals['execute'] = True
+            self.control_signals['alu_operation'] = opcode
+        elif opcode == 'JUMP_IF_ZERO':
+            self.control_signals['execute'] = True
+            self.control_signals['alu_operation'] = opcode
 
         return self.control_signals
