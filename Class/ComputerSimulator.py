@@ -144,6 +144,7 @@ class ComputerSimulator:
 
         self.instructions = []
         self.register_bank.clear_registers()  # Limpia los registros
+        self.memory.clear_registers()
         self.update_memory_display()
 
     def load_instructions(self):
