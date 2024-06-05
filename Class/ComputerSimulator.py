@@ -37,11 +37,13 @@ class ComputerSimulator:
         self.ir_register = Register(self.canvas, 105, 120, "IR")
         self.mbr_register = Register(self.canvas, 110, 200, "MBR")
         self.alu_text = Register(self.canvas, 105, 280, "ALU")
+        self.psw_register = Register(self.canvas, 190, 380, "PSW")
 
         # Inicializa otros elementos visuales y datos necesarios para la simulación.
         self.instructions = []
         self.control_signals_text = {}
         self.create_control_signals_display()
+        self.update_psw_display()
 
     # Métodos para crear y organizar los elementos de la GUI.
     def create_widgets(self):
@@ -71,6 +73,7 @@ class ComputerSimulator:
         self.canvas.create_rectangle(70, 105, 250, 165, outline="white")
         self.canvas.create_rectangle(70, 185, 250, 245, outline="white")
         self.canvas.create_rectangle(70, 265, 250, 325, outline="white")
+        self.canvas.create_rectangle(70, 370, 430, 430, outline="white")
 
         self.bus_direcciones = self.canvas.create_rectangle(
             450, 105, 600, 165, outline="white")
@@ -136,9 +139,10 @@ class ComputerSimulator:
 
         self.pc_register.set_value(0)
         self.mar_register.set_value(0)
-        self.ir_register.set_value("")
+        self.ir_register.set_value(0)
         self.mbr_register.set_value(0)
-        self.alu_text.set_value("")
+        self.psw_register.set_value("Z: 0, C: 0, S: 0, O: 0 ")
+        self.alu_text.set_value(0)
 
         self.instructions = []
         self.register_bank.clear_registers()  # Limpia los registros
@@ -276,6 +280,7 @@ class ComputerSimulator:
             self.root.after(2000, self.execute_all_instructions)
         else:
             print("Execution completed.")
+        self.update_psw_display()
 
     def execute_single_instruction(self):
         # Si no hay instrucciones en la cola, termina la ejecución
@@ -283,3 +288,9 @@ class ComputerSimulator:
             self.fetch_cycle()
         else:
             print("Execution completed.")
+
+        self.update_psw_display()
+
+    def update_psw_display(self):
+        psw_text = f"Z: {self.alu.psw['Z']} C: {self.alu.psw['C']} S: {self.alu.psw['S']} O: {self.alu.psw['O']}"
+        self.psw_register.set_value(psw_text)

@@ -35,11 +35,11 @@ MOVE R5, R4
 
 LOAD R1, 10: Carga el valor 10 en el registro R1.
 LOAD R4, 50: Carga el valor 50 en el registro R4.
-STORE R1, 20: Almacena el valor de R1 (que es 10) en la dirección de memoria 20.
-LOAD R2, 20: Carga el valor 20 en el registro R2.
+STORE R1, 20: Almacena el valor de R1 (que es 10) en la dirección de memoria 8.
+LOAD R2, 8: Carga el valor 8 en el registro R2.
 LOAD R3, *R2:
-R2 tiene 20.
-Se accede a la dirección de memoria 20, donde está almacenado el valor 10 (por la instrucción STORE anterior).
+R2 tiene 8.
+Se accede a la dirección de memoria 8, donde está almacenado el valor 10 (por la instrucción STORE anterior).
 Carga ese valor 10 en R3.
 ADD R4, R3: Suma el valor de R3 (que es 10) al valor de R4 (que es 50), resultando en 60, y almacena el resultado en R4.
 MOVE R5, R4: Mueve el valor de R4 (que es 60) al registro R5.
