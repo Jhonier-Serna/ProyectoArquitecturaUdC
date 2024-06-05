@@ -239,7 +239,7 @@ class ComputerSimulator:
         elif opcode == 'LOAD':
             if reg2.startswith('*'):
                 address = self.register_bank.get(reg2[1:])
-                value = self.memory.load_data(address)
+                value = self.memory.load_data(address).value
                 self.highlight_data_travel()
                 self.mbr_register.set_value(value)
 
