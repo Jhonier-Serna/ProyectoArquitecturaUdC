@@ -26,8 +26,8 @@ Ejemplos de uso y explicación:
 
 LOAD R1, 10
 LOAD R4, 50
-STORE R1, 20
-LOAD R2, 20
+STORE R1, 8
+LOAD R2, 8
 LOAD R3, *R2
 ADD R4, R3
 MOVE R5, R4

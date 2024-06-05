@@ -25,7 +25,7 @@ class ComputerSimulator:
         self.create_layout()
 
         # Inicializa los componentes principales de la computadora.
-        self.memory = Memory(256)
+        self.memory = Memory(self.canvas, 850, 70, 256)
         self.alu = ALU()
         self.control_unit = ControlUnit()
         self.register_bank = RegisterBank(self.canvas, 300, 45)
@@ -46,7 +46,7 @@ class ComputerSimulator:
     # Métodos para crear y organizar los elementos de la GUI.
     def create_widgets(self):
         # Crea elementos de la GUI como lienzo, widget de texto y botón de inicio.
-        self.canvas = Canvas(self.root, width=1200, height=500,
+        self.canvas = Canvas(self.root, width=1250, height=500,
                              bg="#2A829A", highlightthickness=0)
         self.text_widget = Text(
             self.root, height=5, width=40, bg="#D8BFD8", fg="black", font=("Arial", 12))
@@ -89,9 +89,12 @@ class ComputerSimulator:
             350, 60, text="Banco de registros", fill="white", font=("Arial", 12, "bold"))
         self.canvas.create_rectangle(270, 40, 430, 350, outline="white")
 
-        self.canvas.create_text(
-            720, 60, text="Memoria Principal", fill="white", font=("Arial", 12, "bold"))
-        self.canvas.create_rectangle(630, 40, 810, 350, outline="white")
+        self.canvas.create_text(810, 20, text="Memoria Principal", fill="white", font=("Arial", 12, "bold"))
+        # Crear el rectángulo y la línea divisoria
+        self.canvas.create_rectangle(630, 40, 990, 480, outline="white")
+        self.canvas.create_line(810, 40, 810, 480, fill="white")
+        self.canvas.create_text(668, 60, text="Instrucciones", fill="white", font=("Arial", 12, "bold"), anchor="w")
+        self.canvas.create_text(877, 60, text="Datos", fill="white", font=("Arial", 12, "bold"), anchor="w")
         self.memory_text = self.canvas.create_text(660, 80, text="", fill="white", anchor="nw",
                                                    font=("Arial", 12, "bold"))
 
@@ -102,8 +105,8 @@ class ComputerSimulator:
                    'alu_operation']
         y_position = 60
         for idx, signal in enumerate(signals):
-            text_id = self.canvas.create_text(900, y_position + idx * 30, text=f"{signal}: Off", fill="white",
-                                              font=("Arial", 12, "bold"))
+            text_id = self.canvas.create_text(1050, y_position + idx * 30, text=f"{signal}: Off", fill="white",
+                                              font=("Arial", 12, "bold"), anchor="w")
             self.control_signals_text[signal] = text_id
 
     def update_control_signals_display(self, control_signals):
@@ -127,7 +130,6 @@ class ComputerSimulator:
         self.canvas.itemconfig(self.memory_text, text=memory_contents)
 
     def reset(self):
-        self.memory = Memory(256)
         self.alu = ALU()
         self.control_unit = ControlUnit()
         self.wired_control_unit = WiredControlUnit()
@@ -140,6 +142,7 @@ class ComputerSimulator:
 
         self.instructions = []
         self.register_bank.clear_registers()  # Limpia los registros
+        self.memory.clear_registers()
         self.update_memory_display()
 
     def load_instructions(self):
@@ -195,7 +198,7 @@ class ComputerSimulator:
             address_register = reg2[1:]
             if address_register in self.register_bank.registers:
                 address = self.register_bank.get(address_register)
-                operand2 = self.memory.load_data(address)
+                operand2 = self.memory.load_data(address).value
             else:
                 raise ValueError(f"Invalid register for indirect addressing: {
                 address_register}")
@@ -240,6 +243,7 @@ class ComputerSimulator:
                 self.highlight_data_travel()
                 self.mbr_register.set_value(value)
 
+                value = self.memory.load_data(address).value
             else:
                 value = operand2
                 self.mbr_register.set_value(value)
@@ -253,6 +257,7 @@ class ComputerSimulator:
 
         elif opcode == 'MOVE':
             self.register_bank.set(reg1, self.register_bank.get(reg2))
+        self.root.update()
 
         self.update_control_signals_display(control_signals)
 
