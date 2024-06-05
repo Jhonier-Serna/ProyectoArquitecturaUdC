@@ -131,7 +131,6 @@ class ComputerSimulator:
         self.canvas.itemconfig(self.memory_text, text=memory_contents)
 
     def reset(self):
-        self.memory = Memory(self.canvas, 850, 70, 256)
         self.alu = ALU()
         self.control_unit = ControlUnit()
         self.wired_control_unit = WiredControlUnit()
@@ -190,7 +189,7 @@ class ComputerSimulator:
             address_register = reg2[1:]
             if address_register in self.register_bank.registers:
                 address = self.register_bank.get(address_register)
-                operand2 = self.memory.load_data(address)
+                operand2 = self.memory.load_data(address).value
             else:
                 raise ValueError(f"Invalid register for indirect addressing: {address_register}")
         elif reg2.isdigit():
@@ -222,7 +221,7 @@ class ComputerSimulator:
         elif opcode == 'LOAD':
             if reg2.startswith('*'):
                 address = self.register_bank.get(reg2[1:])
-                value = self.memory.load_data(address)
+                value = self.memory.load_data(address).value
             else:
                 value = operand2
             self.register_bank.set(reg1, value)

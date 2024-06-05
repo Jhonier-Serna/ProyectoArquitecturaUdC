@@ -9,8 +9,7 @@ class Memory:
     def __init__(self, canvas, x, y, size):
         # La memoria se divide en dos partes: memoria de instrucciones y memoria de datos.
         self.instruction_memory = [''] * (size // 2)
-        # self.data_memory = {i: 0 for i in range(size // 2, size)}
-        self.data_memory = {i: Register(canvas, x, y + i * 30, i) for i in range(0, 20)}
+        self.data_memory = {i: Register(canvas, x, y + i * 20, i) for i in range(0, 20)}
 
     # Método load_instruction: Carga una instrucción desde la memoria de instrucciones.
     # Parámetros:
