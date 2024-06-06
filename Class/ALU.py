@@ -8,7 +8,7 @@ class ALU:
         self.psw = {
             'Z': 0,  # Zero flag
             'C': 0,  # Carry flag
-            'S': 0,  # Sign flag
+            'S': 0,  # Sign(+/-) flag
             'O': 0  # Overflow flag
         }
 

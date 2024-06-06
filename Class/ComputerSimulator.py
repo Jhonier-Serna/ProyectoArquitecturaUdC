@@ -218,8 +218,7 @@ class ComputerSimulator:
                 address = self.register_bank.get(address_register)
                 operand2 = self.memory.load_data(address).value
             else:
-                raise ValueError(f"Invalid register for indirect addressing: {
-                    address_register}")
+                raise ValueError(f"Invalid register for indirect addressing: {address_register}")
         elif reg2.isdigit():
             operand2 = int(reg2)
         elif reg2 in self.register_bank.registers:
@@ -309,6 +308,5 @@ class ComputerSimulator:
         self.update_psw_display()
 
     def update_psw_display(self):
-        psw_text = f"Z: {self.alu.psw['Z']} C: {self.alu.psw['C']} S: {
-            self.alu.psw['S']} O: {self.alu.psw['O']}"
+        psw_text = f"Z: {self.alu.psw['Z']} C: {self.alu.psw['C']} S: {self.alu.psw['S']} O: {self.alu.psw['O']}"
         self.psw_register.set_value(psw_text)
