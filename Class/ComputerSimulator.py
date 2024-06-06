@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import Canvas, Text
+from tkinter import Canvas, Text, Scrollbar
 
 from Class.ALU import ALU
 from Class.ControlUnit import ControlUnit
@@ -25,7 +25,7 @@ class ComputerSimulator:
         self.create_layout()
 
         # Inicializa los componentes principales de la computadora.
-        self.memory = Memory(self.canvas, 850, 70, 256)
+        self.memory = Memory(self.canvas, 850, 70, 32)
         self.alu = ALU()
         self.control_unit = ControlUnit()
         self.register_bank = RegisterBank(self.canvas, 300, 45)
@@ -92,16 +92,20 @@ class ComputerSimulator:
             350, 60, text="Banco de registros", fill="white", font=("Arial", 12, "bold"))
         self.canvas.create_rectangle(270, 40, 430, 350, outline="white")
 
-        self.canvas.create_text(810, 20, text="Memoria Principal", fill="white", font=("Arial", 12, "bold"))
+        self.canvas.create_text(
+            810, 20, text="Memoria Principal", fill="white", font=("Arial", 12, "bold"))
         # Crear el rectángulo y la línea divisoria
         self.canvas.create_rectangle(630, 40, 990, 480, outline="white")
         self.canvas.create_line(810, 40, 810, 480, fill="white")
-        self.canvas.create_text(668, 60, text="Instrucciones", fill="white", font=("Arial", 12, "bold"), anchor="w")
-        self.canvas.create_text(877, 60, text="Datos", fill="white", font=("Arial", 12, "bold"), anchor="w")
+        self.canvas.create_text(668, 60, text="Instrucciones", fill="white", font=(
+            "Arial", 12, "bold"), anchor="w")
+        self.canvas.create_text(877, 60, text="Datos", fill="white", font=(
+            "Arial", 12, "bold"), anchor="w")
         self.memory_text = self.canvas.create_text(660, 80, text="", fill="white", anchor="nw",
                                                    font=("Arial", 12, "bold"))
 
     # Método para mostrar las señales de control en la GUI.
+
     def create_control_signals_display(self):
         # Crea textos en el lienzo para mostrar las señales de control y sus estados.
         signals = ['fetch', 'decode', 'execute', 'memory_read', 'memory_write', 'register_read', 'register_write',
@@ -129,7 +133,7 @@ class ComputerSimulator:
 
     def update_memory_display(self):
         memory_contents = "\n".join(
-            f"{i + 1} - {instr}" for i, instr in enumerate(self.instructions))
+            f"{i} - {instr}" for i, instr in enumerate(self.instructions))
         self.canvas.itemconfig(self.memory_text, text=memory_contents)
 
     def reset(self):
@@ -156,17 +160,27 @@ class ComputerSimulator:
         instructions = self.text_widget.get("1.0", tk.END).strip().split('\n')
         for idx, instruction in enumerate(instructions):
             if instruction.strip():
+                if (len(self.instructions) >= self.memory.size // 2):
+                    print(
+                        "There is no space in memory to load more instructions.")
+                    break
                 self.memory.store_instruction(idx, instruction.strip())
                 self.instructions.append(instruction.strip())
+
         self.update_memory_display()
         self.execute_all_instructions()
 
     def load_single_instructions(self):
         # Carga las instrucciones ingresadas por el usuario desde el widget de texto.
         # Inicializa la simulación y ejecuta las instrucciones cargadas.
+        self.reset()
         instructions = self.text_widget.get("1.0", tk.END).strip().split('\n')
         for idx, instruction in enumerate(instructions):
             if instruction.strip():
+                if (len(self.instructions) >= self.memory.size // 2):
+                    print(
+                        "There is no space in memory to load more instructions.")
+                    break
                 self.memory.store_instruction(idx, instruction.strip())
                 self.instructions.append(instruction.strip())
         self.update_memory_display()
@@ -205,7 +219,7 @@ class ComputerSimulator:
                 operand2 = self.memory.load_data(address).value
             else:
                 raise ValueError(f"Invalid register for indirect addressing: {
-                address_register}")
+                    address_register}")
         elif reg2.isdigit():
             operand2 = int(reg2)
         elif reg2 in self.register_bank.registers:
@@ -227,7 +241,8 @@ class ComputerSimulator:
         self.reset_data_travel()
 
         if control_signals['alu_operation']:
-            self.alu.execute(control_signals['alu_operation'], operand1, operand2)
+            self.alu.execute(
+                control_signals['alu_operation'], operand1, operand2)
             result = self.alu.value
 
             if opcode in ['ADD', 'SUB', 'MUL', 'DIV', 'AND', 'OR', 'NOT', 'XOR']:
@@ -249,6 +264,8 @@ class ComputerSimulator:
 
                 value = self.memory.load_data(address).value
             else:
+                if (operand2 > 0x3FFF or operand2 < - 0x4000):
+                    raise ValueError('Operands out of range')
                 value = operand2
                 self.mbr_register.set_value(value)
                 self.highlight_data_travel()
@@ -292,5 +309,6 @@ class ComputerSimulator:
         self.update_psw_display()
 
     def update_psw_display(self):
-        psw_text = f"Z: {self.alu.psw['Z']} C: {self.alu.psw['C']} S: {self.alu.psw['S']} O: {self.alu.psw['O']}"
+        psw_text = f"Z: {self.alu.psw['Z']} C: {self.alu.psw['C']} S: {
+            self.alu.psw['S']} O: {self.alu.psw['O']}"
         self.psw_register.set_value(psw_text)

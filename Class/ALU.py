@@ -19,39 +19,44 @@ class ALU:
     # - operand2: Segundo operando para la operación.
     # - Almacena el resultado de la operación en el atributo `value`.
     def execute(self, opcode, operand1, operand2):
-        if opcode == 'ADD':
-            self.value = operand1 + operand2
-            self.psw['C'] = int(self.value > 0xFFFFFFFF)
-            self.psw['O'] = int(((operand1 & 0x80000000) == (operand2 & 0x80000000)) and (
-                    (self.value & 0x80000000) != (operand1 & 0x80000000)))
-        elif opcode == 'SUB':
-            self.value = operand1 - operand2
-            self.psw['C'] = int(operand1 < operand2)
-            self.psw['O'] = int(((operand1 & 0x80000000) != (operand2 & 0x80000000)) and (
-                    (self.value & 0x80000000) != (operand1 & 0x80000000)))
-        elif opcode == 'MUL':
-            self.value = operand1 * operand2
-            self.psw['C'] = int(self.value > 0xFFFFFFFF)
-        elif opcode == 'DIV':
-            if operand2 == 0:
-                self.value = 0
-                self.psw['Z'] = 1
-            else:
-                self.value = operand1 // operand2
-        elif opcode == 'AND':
-            self.value = operand1 & operand2
-        elif opcode == 'OR':
-            self.value = operand1 | operand2
-        elif opcode == 'NOT':
-            self.value = ~operand2
-        elif opcode == 'XOR':
-            self.value = operand1 ^ operand2
-        elif opcode == 'JP':
-            self.value = operand1  # For jump, the value is the new address
-        elif opcode == 'JPZ':
-            self.value = operand1 if operand2 == 0 else None  # operand1 is the address, operand2 is the condition
+        if (operand1 > 0x3FFF or operand1 < -
+           0x4000 or operand2 > 0x3FFF or operand2 < -0x4000):
+            self.psw['O'] = 1
+            raise ValueError('Operands out of range')
+        else:
+            if opcode == 'ADD':
+                self.value = operand1 + operand2
+                self.psw['C'] = int(self.value > 0x3FFF)
+                self.psw['O'] = int(((operand1 & 0x2000) == (operand2 & 0x2000)) and (
+                    (self.value & 0x2000) != (operand1 & 0x2000)))
+            elif opcode == 'SUB':
+                self.value = operand1 - operand2
+                self.psw['C'] = int(operand1 < operand2)
+                self.psw['O'] = int(((operand1 & 0x2000) != (operand2 & 0x2000)) and (
+                    (self.value & 0x2000) != (operand1 & 0x2000)))
+            elif opcode == 'MUL':
+                self.value = operand1 * operand2
+                self.psw['C'] = int(self.value > 0x3FFF)
+            elif opcode == 'DIV':
+                if operand2 == 0:
+                    self.value = 0
+                    self.psw['Z'] = 1
+                else:
+                    self.value = operand1 // operand2
+            elif opcode == 'AND':
+                self.value = operand1 & operand2
+            elif opcode == 'OR':
+                self.value = operand1 | operand2
+            elif opcode == 'NOT':
+                self.value = ~operand2
+            elif opcode == 'XOR':
+                self.value = operand1 ^ operand2
+            elif opcode == 'JP':
+                self.value = operand1
+            elif opcode == 'JPZ':
+                self.value = operand1 if operand2 == 0 else None
 
-        # Actualiza las banderas PSW
+        # Actualiza los flags del PSW
         self.psw['Z'] = int(self.value == 0)
         self.psw['S'] = int(self.value < 0)
 
