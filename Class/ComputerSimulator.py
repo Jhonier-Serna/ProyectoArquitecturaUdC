@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import Canvas, Text, Scrollbar
+from tkinter import Canvas, Text
 
 from Class.ALU import ALU
 from Class.ControlUnit import ControlUnit
@@ -248,11 +248,11 @@ class ComputerSimulator:
                 self.alu_text.set_value(
                     f"{operand1} {opcode} {operand2 if operand2 is not None else ''} = {self.alu.value}")
                 self.register_bank.set(reg1, result)
-            elif opcode == 'JUMP':
-                self.pc_register.set_value(result)
-            elif opcode == 'JUMP_IF_ZERO':
-                if result is not None:
-                    self.pc_register.set_value(result)
+        elif opcode == 'JP':
+            self.pc_register.set_value(operand1)
+        elif opcode == 'JPZ':
+            if operand2 != 0:
+                self.pc_register.set_value(operand1)
 
         elif opcode == 'LOAD':
             if reg2.startswith('*'):
